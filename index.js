@@ -2,8 +2,6 @@ const { Client, Intents, Collection, Guild } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 require('dotenv').config();
-const clientId =process.env.CLIENT_ID
-const guildId =process.env.GUILD_ID
 const token = process.env.TOKEN
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS,Intents.FLAGS.GUILD_VOICE_STATES] });
@@ -32,9 +30,10 @@ client.on('interactionCreate', async interaction => {
 
 	try {
 		await command.execute(interaction);
+    awi 
     var channel = client.channels.cache.get(interaction.channelId)
     channel.send(`[${interaction.options.data[0].value}] 라고 했다`)
-    console.log(token,clientId,guildId)
+    console.log(interaction.options.data[0].value)
 	} catch (error) {
 		console.error(error);
 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });

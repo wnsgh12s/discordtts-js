@@ -2,7 +2,6 @@ const { Client, Intents, Collection, Guild, Interaction } = require('discord.js'
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const {joinVoiceChannel,createAudioPlayer,createAudioResource} = require('@discordjs/voice')
 const {getAudioUrl} = require('google-tts-api')
-const { ddd } = require("../bitch")
 const client = new Client({ intents: [Intents.FLAGS.GUILDS,Intents.FLAGS.GUILD_VOICE_STATES] });
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -21,11 +20,13 @@ module.exports = {
       host: 'https://translate.google.com',
       timeotu:10000
     });
+    
     const connection = joinVoiceChannel({
       channelId: interaction.member.voice.channelId,
       guildId: interaction.guildId,
       adapterCreator: interaction.guild.voiceAdapterCreator
     });
+
     const player = createAudioPlayer();
     const resource = createAudioResource(url);
     connection.subscribe(player);

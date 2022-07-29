@@ -26,7 +26,7 @@ const rest = new REST({ version: '9' }).setToken(token);
 			{ body: commands },
 		);
 
-		console.log('보내기성송');
+		console.log('보내기성공');
 	} catch (error) {
 		console.error(error);
 	}

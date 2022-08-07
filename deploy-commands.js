@@ -13,29 +13,29 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
-  console.log(command)
 	commands.push(command.data.toJSON());
 }
 
 const rest = new REST({ version: '9' }).setToken(token);
 
 (async () => {
-	// try {
-	// 	await rest.put(
-	// 		Routes.applicationGuildCommands(clientId, guildId),
-	// 		{body: commands},
-	// 	);
-	// 	console.log('보내기성공');
-	// } catch (error) {
-	// 	console.error(error);
-	// }
-  try {
-    await rest.put(Routes.applicationCommands(clientId),{ 
-      body: commands,
-    });
-    console.log('글로벌 명령어 등록성공')
-  }
-  catch (error) {
-    console.log(error)
-  }
+	try {
+		await rest.put(
+			Routes.applicationGuildCommands(clientId, guildId),
+			{body: commands},
+		);
+    console.log('보내기')
+	} catch (error) {
+		console.error(error);
+    console.log('실패ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ')
+	}
+  // try {
+  //   await rest.put(Routes.applicationCommands(clientId),{ 
+  //     body: commands,
+  //   });
+  //   console.log('글로벌 명령어 등록성공')
+  // }
+  // catch (error) {
+  //   console.log(error)
+  // }  
 })();

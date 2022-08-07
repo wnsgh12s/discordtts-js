@@ -32,8 +32,6 @@ client.on('interactionCreate', async interaction => {
 	try {
 		await command.execute(interaction);
     const channel = client.channels.cache.get(interaction.channelId)
-    await channel.send(`${interaction.member.nickname}🗣 :  ${interaction.options.data[0].value}`)
-    console.log(interaction.channelId)
 	} catch (error) {
 		console.error(error);
 		await interaction.reply({ content: '에러떳다', ephemeral: true });
@@ -41,20 +39,18 @@ client.on('interactionCreate', async interaction => {
 
 });
 let state = 'idle'
-
 client.on('messageCreate',async msg =>{
-  if(state !== 'idle') return
   if(msg.channelId === '841686942772494397' ){
     if(msg.author.bot) return
     if(!msg.member.voice.channelId) return msg.reply({content:'채널먼저가자',ephemeral: true})  
     let voiceData = msg.content
+    if(state !== 'idle') return
     const url = getAudioUrl(voiceData, {
       lang: 'ko',
       slow: false,
       host: 'https://translate.google.com',
       timeotu:10000
-    });
-
+    }); 
     const connection = joinVoiceChannel({
       channelId: msg.member.voice.channelId,
       guildId: msg.guildId,
@@ -71,5 +67,16 @@ client.on('messageCreate',async msg =>{
     })    
   }
 })
-
+let vote = []
+client.on('interactionCreate', interaction => {
+	if (!interaction.isSelectMenu()) return;
+  function getCount(array) {
+    return array.reduce((pv, cv)=>{
+        pv[cv] = (pv[cv] || 0) + 1;
+        return pv;
+    }, {});
+}
+	vote.push(...interaction.values)
+  
+});
 client.login(token);

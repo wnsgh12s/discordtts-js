@@ -1,13 +1,11 @@
-const { Client, Intents, Collection, Guild, Interaction } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const {joinVoiceChannel,createAudioPlayer,createAudioResource, AudioPlayerStatus} = require('@discordjs/voice')
 const {getAudioUrl} = require('google-tts-api')
-const client = new Client({ intents: [Intents.FLAGS.GUILDS,Intents.FLAGS.GUILD_VOICE_STATES] });
 module.exports = {
   state : 'idle',
 	data: new SlashCommandBuilder()
-		.setName('t')
-		.setDescription('적어라')
+		.setName('text')
+		.setDescription('적어라') 
     .addStringOption(option => option
       .setName("chat")
       .setDescription("하하")

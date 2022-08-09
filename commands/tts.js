@@ -34,6 +34,6 @@ module.exports = {
     player.on(AudioPlayerStatus.Idle,()=>{
       this.state = 'idle'
     })
-    interaction.reply(`돈땃지미`)
+    interaction.reply({content:'땃지미'})
 	}
 };  

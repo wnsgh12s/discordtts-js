@@ -2,7 +2,9 @@ const { Client, Intents, Collection, Guild} = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 const {getAudioUrl} = require('google-tts-api')
-const {joinVoiceChannel,createAudioPlayer,createAudioResource, AudioPlayerStatus} = require('@discordjs/voice')
+const {joinVoiceChannel,createAudioPlayer,createAudioResource,AudioPlayerStatus,VoiceConnection} = require('@discordjs/voice');
+const { channel } = require('node:diagnostics_channel');
+const { ModalBuilder } = require('@discordjs/builders');
 require('dotenv').config();
 const token = process.env.TOKEN
 
@@ -40,11 +42,11 @@ client.on('interactionCreate', async interaction => {
 });
 let state = 'idle'
 client.on('messageCreate',async msg =>{
-  if(msg.channelId === '841686942772494397' ){
+  if(msg.channelId === '841686942772494397'||'946421406067998832' ){
     if(msg.author.bot) return
-    if(!msg.member.voice.channelId) return msg.reply({content:'채널먼저가자',ephemeral: true})  
+    if(!msg.member.voice.channelId) return msg.reply({content:'채널먼저가자',ephemeral: true})
+    console.log(msg.member.displayAvatarURL({dynamic:true}))
     let voiceData = msg.content
-    if(state !== 'idle') return
     const url = getAudioUrl(voiceData, {
       lang: 'ko',
       slow: false,
@@ -56,7 +58,7 @@ client.on('messageCreate',async msg =>{
       guildId: msg.guildId,
       adapterCreator: msg.guild.voiceAdapterCreator
     });
-
+    
     const player = createAudioPlayer();
     const resource = createAudioResource(url);
     connection.subscribe(player);
@@ -67,16 +69,9 @@ client.on('messageCreate',async msg =>{
     })    
   }
 })
-let vote = []
+
+
 client.on('interactionCreate', interaction => {
 	if (!interaction.isSelectMenu()) return;
-  function getCount(array) {
-    return array.reduce((pv, cv)=>{
-        pv[cv] = (pv[cv] || 0) + 1;
-        return pv;
-    }, {});
-}
-	vote.push(...interaction.values)
-  
 });
 client.login(token);

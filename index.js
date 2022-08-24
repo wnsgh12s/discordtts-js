@@ -40,34 +40,60 @@ client.on('interactionCreate', async interaction => {
 	}
 
 });
-let channels = ['841686942772494397','402390441300983810']
+let channels = ['841686942772494397','402390441300983810','857626669225738264']
 let state = 'idle'
+let chat = ''
 client.on('messageCreate',async msg =>{
+  if(state !== 'idle'){
+    chat = chat.concat(' ' + msg.content)
+    return
+  }
   if(!channels.includes(msg.channelId)) return
   if(channels.includes(msg.channelId)){ 
     if(msg.author.bot) return 
-    if(!msg.member.voice.channelId) return //msg.reply({content:'채널먼저가자',ephemeral: true})
-    // if(state === 'playing') return msg.reply({content:'재생중이자누',ephemeral: true})
-    let voiceData = msg.content
-    const url = getAudioUrl(voiceData, {
-      lang: 'ko',
-      slow: false,
-      host: 'https://translate.google.com',
-      timeotu:10000
-    }); 
-    const connection = joinVoiceChannel({
-      channelId: msg.member.voice.channelId,
-      guildId: msg.guildId,
-      adapterCreator: msg.guild.voiceAdapterCreator
-    });
-    const player = createAudioPlayer();
-    const resource = createAudioResource(url);
-    connection.subscribe(player);
-    player.play(resource)
-    // state = 'playing'
-    // player.on(AudioPlayerStatus.Idle,()=>{
-    // state = 'idle'
-    // })    
+    if(!msg.member.voice.channelId) return
+      let voiceData = msg.content
+      const url = getAudioUrl(voiceData, {
+        lang: 'ko',
+        slow: false,
+        host: 'https://translate.google.com',
+        timeotu:10000
+      }); 
+      const connection = joinVoiceChannel({
+        channelId: msg.member.voice.channelId,
+        guildId: msg.guildId,
+        adapterCreator: msg.guild.voiceAdapterCreator
+      });
+      const player = createAudioPlayer();
+      const resource = createAudioResource(url);
+      connection.subscribe(player);
+      player.play(resource)    
+      state = 'playing'
+      player.on(AudioPlayerStatus.Idle,()=>{
+      state = 'idle'
+    })
+      player.on('stateChange', (oldState, newState) => {
+        if(newState.status === 'idle' && chat !== ''){
+                let voiceData2 = chat
+                const url = getAudioUrl(voiceData2, {
+                  lang: 'ko',
+                  slow: false,
+                  host: 'https://translate.google.com',
+                  timeotu:10000
+                }); 
+                const connection = joinVoiceChannel({
+                  channelId: msg.member.voice.channelId,
+                  guildId: msg.guildId,
+                  adapterCreator: msg.guild.voiceAdapterCreator
+                });
+                const player = createAudioPlayer();
+                const resource = createAudioResource(url);
+                connection.subscribe(player);
+                player.play(resource)
+                chat = ''         
+            
+        }
+      });
   }
 })
 

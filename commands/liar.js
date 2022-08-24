@@ -2,6 +2,7 @@ const { SlashCommandBuilder} = require('@discordjs/builders');
 const { createAudioPlayer, createAudioResource, AudioPlayerStatus, joinVoiceChannel } = require('@discordjs/voice');
 const { MessageActionRow, MessageButton,MessageEmbed,MessageSelectMenu, Modal, TextInputComponent} = require('discord.js');
 const { getAudioUrl, getAudioBase64 } = require('google-tts-api');
+const Word1 = require('../word/word')
 module.exports = {
   participant: [],
   userName: [],
@@ -14,7 +15,6 @@ module.exports = {
 		.setName('liar')
 		.setDescription('liarGameStart'),
   async execute(interaction){
-    
     const connection = joinVoiceChannel({
       channelId: interaction.member.voice.channelId,
       guildId: interaction.guildId,
@@ -83,12 +83,10 @@ module.exports = {
 
     btnCollector.on("end",async(collect)=>{
       //술래정하기
-      // if(this.participant.length < 2) return
       let setTagNumber = Math.floor(Math.random() * this.participant.length)
       let setTag = this.participant[setTagNumber]
       let setTagName = this.userName[setTagNumber]
       let setTagMember = this.member[setTagNumber]
-      console.log(setTagName)
       //술래를 제외한 나머지
       let remainder = this.member.filter((item)=>{
         if(setTagMember !== item) return item
@@ -103,9 +101,8 @@ module.exports = {
       }  
       // 사람이 3명보다 많으면 시작 메세지
       if(this.userName[0] === undefined) return
-      // if(this.participant.length < 2 ) return  interaction.channel.send({content:'3명 미만으로는 시작 할 수 없는걸...'})   
+      if(this.participant.length < 3 ) return  interaction.channel.send({content:'킹치만 3명 미만으로는 시작 할 수 없는걸...'})   
       interaction.channel.send({content:`참가자들에게 제시어를 DM 으로 제공합니다.`})
-      let Word1 = ['사과','귤','오렌지','감자','당근','마늘','오뎅']
       let Word2 = ['가지','임연수어','고등어','가물치','오이','떡볶이']
       let random = Math.floor(Math.random()*Word1.length)
         collect.forEach(click=>{
@@ -115,7 +112,8 @@ module.exports = {
             click.user.send({content:`제시어는:${Word1[random]}`})
           }
         })
-        let voteMessage = new MessageEmbed().setDescription('6  0초 동안 라이어가 누구인지 투표하세요')
+        console.log(setTagName,setTagMember)
+        let voteMessage = new MessageEmbed().setDescription(`${30 * this.userName.length}초 동안 라이어가 누구인지 투표하세요`)
         let userMenu = []
         let initialization = () =>{
           this.participant = []
@@ -151,7 +149,6 @@ module.exports = {
           //투표했으면 못함
           if(this.votedUser.includes(interaction.member.nickname || interaction.user.username)) return interaction.channel.send({content:`${ interaction.member.nickname || interaction.user.username} 님은 이미 투표 하셧습니다.`})
           votedUser.push(interaction.member.nickname || interaction.user.username)
-          console.log(votedUser.length,this.userName.length)
           if(votedUser.length === this.userName.length) {
             selectCollector._timeout._onTimeout()
           }
@@ -206,7 +203,6 @@ module.exports = {
                   }
                 }
                 same = []
-                console.log(Word1[random],setTagName)
                 let answer = new MessageButton(0);
                   answer.setCustomId(Word1[random]);
                   answer.setLabel(Word1[random]);
@@ -264,8 +260,8 @@ module.exports = {
         
         
           await interaction.channel.send({embeds:[voteMessage],components:[row]}).then(msg=>{
-            player.play(resource('60초 동안 라이어가 누구인지 토론 후 투표하세요'))
-            let count = 60
+            player.play(resource(`${30 * this.userName.length}초 동안 라이어가 누구인지 토론 후 투표하세요`))
+            let count = 30 * this.userName.length
             let counter = setInterval(() => {
               count--
               msg.edit({content:`${count}초 남음`})

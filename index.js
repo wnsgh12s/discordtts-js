@@ -40,12 +40,14 @@ client.on('interactionCreate', async interaction => {
 	}
 
 });
+let channels = ['841686942772494397','402390441300983810']
 let state = 'idle'
 client.on('messageCreate',async msg =>{
-  if(msg.channelId === '841686942772494397'||'946421406067998832' ){
-    if(msg.author.bot) return
-    if(!msg.member.voice.channelId) return msg.reply({content:'채널먼저가자',ephemeral: true})
-    console.log(msg.member.displayAvatarURL({dynamic:true}))
+  if(!channels.includes(msg.channelId)) return
+  if(channels.includes(msg.channelId)){ 
+    if(msg.author.bot) return 
+    if(!msg.member.voice.channelId) return //msg.reply({content:'채널먼저가자',ephemeral: true})
+    // if(state === 'playing') return msg.reply({content:'재생중이자누',ephemeral: true})
     let voiceData = msg.content
     const url = getAudioUrl(voiceData, {
       lang: 'ko',
@@ -58,15 +60,14 @@ client.on('messageCreate',async msg =>{
       guildId: msg.guildId,
       adapterCreator: msg.guild.voiceAdapterCreator
     });
-    
     const player = createAudioPlayer();
     const resource = createAudioResource(url);
     connection.subscribe(player);
     player.play(resource)
-    state = 'playing'
-    player.on(AudioPlayerStatus.Idle,()=>{
-      state = 'idle'
-    })    
+    // state = 'playing'
+    // player.on(AudioPlayerStatus.Idle,()=>{
+    // state = 'idle'
+    // })    
   }
 })
 

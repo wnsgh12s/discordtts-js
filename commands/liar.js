@@ -98,10 +98,24 @@ module.exports = {
       }
       function setTagKick(){
         setTagMember.voice.disconnect()
+      }
+      let userMenu = [] 
+      const initialization = () =>{
+        this.participant = []
+        this.userName = []
+        this.vote = []
+        this.votedUser = []
+        this.votedUserName = []
+        console.log()
+        userMenu = []
       }  
       // 사람이 3명보다 많으면 시작 메세지
       if(this.userName[0] === undefined) return
-      if(this.participant.length < 3 ) return  interaction.channel.send({content:'킹치만 3명 미만으로는 시작 할 수 없는걸...'})   
+      if(this.participant.length < 3 ){
+        interaction.channel.send({content:'킹치만 3명 미만으로는 시작 할 수 없는걸...'})
+        initialization()
+        return
+      }   
       interaction.channel.send({content:`참가자들에게 제시어를 DM 으로 제공합니다.`})
       let Word2 = ['가지','임연수어','고등어','가물치','오이','떡볶이']
       let random = Math.floor(Math.random()*Word1.length)
@@ -112,17 +126,7 @@ module.exports = {
             click.user.send({content:`제시어는:${Word1[random]}`})
           }
         })
-        console.log(setTagName,setTagMember)
         let voteMessage = new MessageEmbed().setDescription(`${30 * this.userName.length}초 동안 라이어가 누구인지 투표하세요`)
-        let userMenu = []
-        let initialization = () =>{
-          this.participant = []
-          this.userName = []
-          this.vote = []
-          this.votedUser = []
-          this.votedUserName = []
-          userMenu = []
-        }
         this.userName.map((user,userIndex)=>{
           userMenu.push(
             {

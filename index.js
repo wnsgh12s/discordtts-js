@@ -44,10 +44,7 @@ let channels = ['841686942772494397','402390441300983810','857626669225738264']
 let state = 'idle'
 let chat = ''
 client.on('messageCreate',async msg =>{
-  if(state !== 'idle'){
-    chat = chat.concat(' ' + msg.content)
-    return
-  }
+  if(state !== 'idle') return chat = chat.concat(' ' + msg.content)
   if(!channels.includes(msg.channelId)) return
   if(channels.includes(msg.channelId)){ 
     if(msg.author.bot) return 
@@ -57,13 +54,13 @@ client.on('messageCreate',async msg =>{
         lang: 'ko',
         slow: false,
         host: 'https://translate.google.com',
-        timeotu:10000
+        timeout:10000
       }); 
       const connection = joinVoiceChannel({
         channelId: msg.member.voice.channelId,
         guildId: msg.guildId,
         adapterCreator: msg.guild.voiceAdapterCreator
-      });
+      })
       const player = createAudioPlayer();
       const resource = createAudioResource(url);
       connection.subscribe(player);
@@ -72,28 +69,22 @@ client.on('messageCreate',async msg =>{
       player.on(AudioPlayerStatus.Idle,()=>{
       state = 'idle'
     })
-      player.on('stateChange', (oldState, newState) => {
-        if(newState.status === 'idle' && chat !== ''){
-                let voiceData2 = chat
-                const url = getAudioUrl(voiceData2, {
-                  lang: 'ko',
-                  slow: false,
-                  host: 'https://translate.google.com',
-                  timeotu:10000
-                }); 
-                const connection = joinVoiceChannel({
-                  channelId: msg.member.voice.channelId,
-                  guildId: msg.guildId,
-                  adapterCreator: msg.guild.voiceAdapterCreator
-                });
-                const player = createAudioPlayer();
-                const resource = createAudioResource(url);
-                connection.subscribe(player);
-                player.play(resource)
-                chat = ''         
-            
-        }
-      });
+    player.on('stateChange', (oldState, newState) => {
+      if(newState.status === 'idle' && chat !== ''){
+              let voiceData = chat
+              const url = getAudioUrl(voiceData, {
+                lang: 'ko',
+                slow: false,
+                host: 'https://translate.google.com',
+                timeout:10000
+              }); 
+              const player = createAudioPlayer();
+              const resource = createAudioResource(url);
+              connection.subscribe(player);
+              player.play(resource)
+              chat = ''         
+      }
+    })
   }
 })
 

@@ -2,7 +2,7 @@ const { Client, Intents, Collection, Guild} = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 const {getAudioUrl} = require('google-tts-api')
-const {joinVoiceChannel,createAudioPlayer,createAudioResource,AudioPlayerStatus,VoiceConnection} = require('@discordjs/voice');
+const {joinVoiceChannel,createAudioPlayer,createAudioResource,AudioPlayerStatus,VoiceConnection, entersState} = require('@discordjs/voice');
 const { channel } = require('node:diagnostics_channel');
 const { ModalBuilder } = require('@discordjs/builders');
 require('dotenv').config();
@@ -40,17 +40,27 @@ client.on('interactionCreate', async interaction => {
 	}
 
 });
-let channels = ['841686942772494397','402390441300983810','857626669225738264']
+let channels = ['841686942772494397','857626669225738264']
 let state = 'idle'
-let chat = ''
+let chat = []
 client.on('messageCreate',async msg =>{
-  if(state !== 'idle') return chat = chat.concat(' ' + msg.content)
-  if(!channels.includes(msg.channelId)) return
+  if(!channels.includes(msg.channelId)) return 
+  if(state !== 'idle'){
+    chat.push(msg.content)
+    return
+  }
   if(channels.includes(msg.channelId)){ 
     if(msg.author.bot) return 
     if(!msg.member.voice.channelId) return
-      let voiceData = msg.content
-      const url = getAudioUrl(voiceData, {
+    if(msg.content.includes('조라')){
+      let nick = msg.member.nickname.split(' ')[0]
+      msg.content = msg.content.replace(/조라/g,nick)
+    }
+    if(msg.member.id === '993596981693911050'){
+    }
+    chat.push(msg.content)
+    function repeat(){
+      const url = getAudioUrl(chat[0], {
         lang: 'ko',
         slow: false,
         host: 'https://translate.google.com',
@@ -63,33 +73,21 @@ client.on('messageCreate',async msg =>{
       })
       const player = createAudioPlayer();
       const resource = createAudioResource(url);
-      connection.subscribe(player);
-      player.play(resource)    
-      state = 'playing'
-      player.on(AudioPlayerStatus.Idle,()=>{
-      state = 'idle'
-    })
-    player.on('stateChange', (oldState, newState) => {
-      if(newState.status === 'idle' && chat !== ''){
-              let voiceData = chat
-              const url = getAudioUrl(voiceData, {
-                lang: 'ko',
-                slow: false,
-                host: 'https://translate.google.com',
-                timeout:10000
-              }); 
-              const player = createAudioPlayer();
-              const resource = createAudioResource(url);
-              connection.subscribe(player);
-              player.play(resource)
-              chat = ''         
-      }
-    })
+      connection.subscribe(player);      
+      player.play(resource)
+
+      player.on(AudioPlayerStatus.Playing, ()=>{
+        chat.shift()
+        state = 'playing'
+      })
+      player.on(AudioPlayerStatus.Idle, ()=>{
+        state = 'idle'
+        chat[0] && repeat()
+      })
+    }
+    repeat() 
   }
 })
 
 
-client.on('interactionCreate', interaction => {
-	if (!interaction.isSelectMenu()) return;
-});
 client.login(token);

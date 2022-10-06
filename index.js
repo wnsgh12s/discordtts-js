@@ -1,4 +1,5 @@
 const { Client, Intents, Collection, Guild} = require('discord.js');
+const textTospeech = require('@google-cloud/text-to-speech')
 const fs = require('node:fs');
 const path = require('node:path');
 const {getAudioUrl} = require('google-tts-api')
@@ -7,6 +8,17 @@ const { channel } = require('node:diagnostics_channel');
 const { ModalBuilder } = require('@discordjs/builders');
 require('dotenv').config();
 const token = process.env.TOKEN
+const speech = new textTospeech.TextToSpeechClient()
+
+async function convertTexttoMp3(data,gender,name){
+  const text = data
+  const [response] = await speech.synthesizeSpeech({
+    input:{text},
+    voice:{languageCode:'ko-KR',ssmlGender:gender,name:name},
+    audioConfig:{audioEncoding:'MP3'}
+  })
+  return response.audioContent
+}
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS,Intents.FLAGS.GUILD_VOICE_STATES,Intents.FLAGS.GUILD_MESSAGES] });
 
@@ -71,19 +83,26 @@ client.on('messageCreate',async msg =>{
   channelObj[msg.channelId].state = 'playing'
   async function repeat(){
     msg.guild.members.cache.get(client.user.id).setNickname(`!${chat[0]?.user}가 말하는 중! `)
-    const url = getAudioUrl(chat[0]?.content, {
-      lang: 'ko',
-      slow: false,
-      host: 'https://translate.google.com',
-      timeout:10000
-    }); 
+    // const url = getAudioUrl(chat[0]?.content, {
+    //   lang: 'ko',
+    //   slow: false,
+    //   host: 'https://translate.google.com',
+    //   timeout:10000
+    // }); 
     const connection = joinVoiceChannel({
       channelId: msg.member.voice.channelId,
       guildId: msg.guildId,
       adapterCreator: msg.guild.voiceAdapterCreator
     })
     const player = createAudioPlayer();
-    const resource = createAudioResource(url);
+    let resource
+    if(msg.member.roles.cache.some(role=>role.name === '남자')){
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'MALE','ko-KR-Wavenet-D'))
+    }else if(msg.member.roles.cache.some(role=>role.name === '여자')){
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-B'))
+    }else{
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Standard-C'))
+    }
     connection.subscribe(player);      
     player.play(resource)
 

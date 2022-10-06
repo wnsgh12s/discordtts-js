@@ -2,7 +2,7 @@ const { Client, Intents, Collection, Guild} = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 const {getAudioUrl} = require('google-tts-api')
-const {joinVoiceChannel,createAudioPlayer,createAudioResource,AudioPlayerStatus,VoiceConnection, entersState} = require('@discordjs/voice');
+const {joinVoiceChannel,createAudioPlayer,createAudioResource,AudioPlayerStatus,VoiceConnection, entersState, getVoiceConnection} = require('@discordjs/voice');
 const { channel } = require('node:diagnostics_channel');
 const { ModalBuilder } = require('@discordjs/builders');
 require('dotenv').config();
@@ -40,54 +40,70 @@ client.on('interactionCreate', async interaction => {
 	}
 
 });
-let channels = ['841686942772494397','857626669225738264']
-let state = 'idle'
-let chat = []
+let channelObj = {
+  '841686942772494397':{
+    chat : [],
+    state : 'idle'
+  },
+  '857626669225738264':{
+    chat : [],
+    state : 'idle'
+  },
+  '402390441300983810':{
+    chat : [],
+    state : 'idle'
+  }
+}
 client.on('messageCreate',async msg =>{
-  if(!channels.includes(msg.channelId)) return 
-  if(state !== 'idle'){
-    chat.push(msg.content)
-    return
-  }
-  if(channels.includes(msg.channelId)){ 
-    if(msg.author.bot) return 
-    if(!msg.member.voice.channelId) return
-    if(msg.content.includes('조라')){
-      let nick = msg.member.nickname.split(' ')[0]
-      msg.content = msg.content.replace(/조라/g,nick)
-    }
-    if(msg.member.id === '993596981693911050'){
-    }
-    chat.push(msg.content)
-    function repeat(){
-      const url = getAudioUrl(chat[0], {
-        lang: 'ko',
-        slow: false,
-        host: 'https://translate.google.com',
-        timeout:10000
-      }); 
-      const connection = joinVoiceChannel({
-        channelId: msg.member.voice.channelId,
-        guildId: msg.guildId,
-        adapterCreator: msg.guild.voiceAdapterCreator
-      })
-      const player = createAudioPlayer();
-      const resource = createAudioResource(url);
-      connection.subscribe(player);      
-      player.play(resource)
+  if(channelObj[msg.channelId] === undefined) return   
+  let botId = msg.guild.members.cache.get(client.user.id).voice.channelId
+  let msgId = msg.member.voice.channelId
+  if(botId !== msgId && botId) return msg.channel.send(`${msg.guild.members.cache.get(client.user.id).voice.channel.name} 채널에서 사용중 입니다.`)
+  let chat = channelObj[msg.channelId].chat
+  if(channelObj[msg.channelId].state !== 'idle') return chat.push({content:msg.content,user:msg.member.nickname.split(' ')[0]}) 
+  if(msg.author.bot) return 
+  if(!msg.member.voice.channelId) return 
+  if(msg.content.includes('조라')){
+    let nick = msg.member.nickname.split(' ')[0]
+    msg.content = msg.content.replace(/조라/g,nick)
+  } 
+  chat.push( { content:msg.content, user: msg.member.nickname.split(' ')[0]})
+  channelObj[msg.channelId].state = 'playing'
+  async function repeat(){
+    msg.guild.members.cache.get(client.user.id).setNickname(`땃지:${chat[0]?.user}의 말`)
+    const url = getAudioUrl(chat[0]?.content, {
+      lang: 'ko',
+      slow: false,
+      host: 'https://translate.google.com',
+      timeout:10000
+    }); 
+    const connection = joinVoiceChannel({
+      channelId: msg.member.voice.channelId,
+      guildId: msg.guildId,
+      adapterCreator: msg.guild.voiceAdapterCreator
+    })
+    const player = createAudioPlayer();
+    const resource = createAudioResource(url);
+    connection.subscribe(player);      
+    player.play(resource)
 
-      player.on(AudioPlayerStatus.Playing, ()=>{
-        chat.shift()
-        state = 'playing'
-      })
-      player.on(AudioPlayerStatus.Idle, ()=>{
-        state = 'idle'
-        chat[0] && repeat()
-      })
-    }
-    repeat() 
+    player.on(AudioPlayerStatus.Playing, ()=>{
+      chat.shift()
+    })
+    player.on(AudioPlayerStatus.Idle, async ()=>{
+      await chat[0] && repeat()
+      channelObj[msg.channelId].state = 'idle'
+    })
   }
+  await repeat()
 })
 
+client.on('voiceStateUpdate',async (oldstate,newState)=>{
+  if(oldstate.channel?.members.size < 2){
+    const connection = getVoiceConnection(oldstate.channel.guild.id)
+    await oldstate.guild.members.cache.get(client.user.id).setNickname('돈땃쥐미')
+    connection && connection.destroy()
+  }
+})
 
 client.login(token);

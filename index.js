@@ -33,7 +33,7 @@ client.on('interactionCreate', async interaction => {
 	if (!command) return;
 	try {
 		await command.execute(interaction);
-    const channel = client.channels.cache.get(interaction.channelId)
+    await interaction.guild.members.cache.get(client.user.id).setNickname('돈땃쥐미')
 	} catch (error) {
 		console.error(error);
 		await interaction.reply({ content: '에러떳다', ephemeral: true });
@@ -56,12 +56,12 @@ let channelObj = {
 }
 client.on('messageCreate',async msg =>{
   if(channelObj[msg.channelId] === undefined) return   
+  if(msg.author.bot) return 
   let botId = msg.guild.members.cache.get(client.user.id).voice.channelId
   let msgId = msg.member.voice.channelId
   if(botId !== msgId && botId) return msg.channel.send(`${msg.guild.members.cache.get(client.user.id).voice.channel.name} 채널에서 사용중 입니다.`)
   let chat = channelObj[msg.channelId].chat
-  if(channelObj[msg.channelId].state !== 'idle') return chat.push({content:msg.content,user:msg.member.nickname.split(' ')[0]}) 
-  if(msg.author.bot) return 
+  if(channelObj[msg.channelId].state !== 'idle') return msg.member && chat.push({content:msg.content,user : msg.member.nickname.split(' ')[0]}) 
   if(!msg.member.voice.channelId) return 
   if(msg.content.includes('조라')){
     let nick = msg.member.nickname.split(' ')[0]
@@ -70,7 +70,7 @@ client.on('messageCreate',async msg =>{
   chat.push( { content:msg.content, user: msg.member.nickname.split(' ')[0]})
   channelObj[msg.channelId].state = 'playing'
   async function repeat(){
-    msg.guild.members.cache.get(client.user.id).setNickname(`땃지:${chat[0]?.user}의 말`)
+    msg.guild.members.cache.get(client.user.id).setNickname(`!${chat[0]?.user}가 말하는 중! `)
     const url = getAudioUrl(chat[0]?.content, {
       lang: 'ko',
       slow: false,

@@ -118,9 +118,12 @@ client.on('messageCreate',async msg =>{
 })
 
 client.on('voiceStateUpdate',async (oldstate,newState)=>{
-  if(oldstate.channel?.members.size < 2){
-    const connection = getVoiceConnection(oldstate.channel.guild.id)
-    await oldstate.guild.members.cache.get(client.user.id).setNickname('돈땃쥐미')
+  let botID = oldstate.guild.members.cache.get(client.user.id).voice.channelId
+  let userId = oldstate.channelId
+  if(oldstate.channel?.members.size < 2 && botID === userId){
+    console.log('실행')
+    let connection = getVoiceConnection(oldstate.guild.id)
+    oldstate.guild.members.cache.get(client.user.id).setNickname('돈땃쥐미')
     connection && connection.destroy()
   }
 })

@@ -10,12 +10,14 @@ require('dotenv').config();
 const token = process.env.TOKEN
 const speech = new textTospeech.TextToSpeechClient()
 
-async function convertTexttoMp3(data,gender,name){
+async function convertTexttoMp3(data,gender,name,pitch,speakingRate){
+  if(speakingRate > 4 || speakingRate < 0.25) speakingRate = 1
+  if(pitch > 20 || pitch < -20 ) pitch = 1
   const text = data
   const [response] = await speech.synthesizeSpeech({
     input:{text},
     voice:{languageCode:'ko-KR',ssmlGender:gender,name:name},
-    audioConfig:{audioEncoding:'MP3'}
+    audioConfig:{audioEncoding:'MP3',pitch,speakingRate}
   })
   return response.audioContent
 }
@@ -66,7 +68,10 @@ let channelObj = {
     state : 'idle'
   }
 }
+let pitch = 1
+let speakingRate = 1
 client.on('messageCreate',async msg =>{
+  if(msg.content.length > 15) return msg.channel.send('채팅너무길어')
   if(channelObj[msg.channelId] === undefined) return   
   if(msg.author.bot) return 
   let botId = msg.guild.members.cache.get(client.user.id).voice.channelId
@@ -74,15 +79,16 @@ client.on('messageCreate',async msg =>{
   if(botId !== msgId && botId) return msg.channel.send(`${msg.guild.members.cache.get(client.user.id).voice.channel.name} 채널에서 사용중 입니다.`)
   let chat = channelObj[msg.channelId].chat
   if(channelObj[msg.channelId].state !== 'idle') return msg.member && chat.push({content:msg.content,user : msg.member.nickname.split(' ')[0]}) 
-  if(!msg.member.voice.channelId) return 
-  if(msg.content.includes('조라')){
-    let nick = msg.member.nickname.split(' ')[0]
-    msg.content = msg.content.replace(/조라/g,nick)
-  } 
+  if(!msg.member.voice.channelId) return  
+  if(msg.content.includes('피치조절') && !isNaN(parseInt(msg.content.split(' ')[1]))){
+    pitch = msg.content.split(' ')[1]
+  }
+  if(msg.content.includes('속도조절') && !isNaN(parseInt(msg.content.split(' ')[1]))){
+    speakingRate = msg.content.split(' ')[1]
+  }
   chat.push( { content:msg.content, user: msg.member.nickname.split(' ')[0]})
   channelObj[msg.channelId].state = 'playing'
   async function repeat(){
-    msg.guild.members.cache.get(client.user.id).setNickname(`!${chat[0]?.user}가 말하는 중! `)
     // const url = getAudioUrl(chat[0]?.content, {
     //   lang: 'ko',
     //   slow: false,
@@ -97,11 +103,11 @@ client.on('messageCreate',async msg =>{
     const player = createAudioPlayer();
     let resource
     if(msg.member.roles.cache.some(role=>role.name === '남자')){
-      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'MALE','ko-KR-Wavenet-D'))
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'MALE','ko-KR-Wavenet-D',pitch,speakingRate))
     }else if(msg.member.roles.cache.some(role=>role.name === '여자')){
-      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-B'))
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-B',pitch,speakingRate))
     }else{
-      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Standard-C'))
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Standard-C',pitch,speakingRate))
     }
     connection.subscribe(player);      
     player.play(resource)
@@ -121,7 +127,6 @@ client.on('voiceStateUpdate',async (oldstate,newState)=>{
   let botID = oldstate.guild.members.cache.get(client.user.id).voice.channelId
   let userId = oldstate.channelId
   if(oldstate.channel?.members.size < 2 && botID === userId){
-    console.log('실행')
     let connection = getVoiceConnection(oldstate.guild.id)
     oldstate.guild.members.cache.get(client.user.id).setNickname('돈땃쥐미')
     connection && connection.destroy()

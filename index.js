@@ -71,7 +71,6 @@ let channelObj = {
 let pitch = 1
 let speakingRate = 1
 client.on('messageCreate',async msg =>{
-  if(msg.content.length > 15) return msg.channel.send('채팅너무길어')
   if(channelObj[msg.channelId] === undefined) return   
   if(msg.author.bot) return 
   let botId = msg.guild.members.cache.get(client.user.id).voice.channelId
@@ -80,6 +79,7 @@ client.on('messageCreate',async msg =>{
   let chat = channelObj[msg.channelId].chat
   if(channelObj[msg.channelId].state !== 'idle') return msg.member && chat.push({content:msg.content,user : msg.member.nickname.split(' ')[0]}) 
   if(!msg.member.voice.channelId) return  
+  if(msg.content.length > 15) return msg.channel.send('채팅너무길어')
   if(msg.content.includes('피치조절') && !isNaN(parseInt(msg.content.split(' ')[1]))){
     pitch = msg.content.split(' ')[1]
   }

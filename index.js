@@ -77,7 +77,7 @@ client.on('messageCreate',async msg =>{
   let msgId = msg.member.voice.channelId
   if(botId !== msgId && botId) return msg.channel.send(`${msg.guild.members.cache.get(client.user.id).voice.channel.name} 채널에서 사용중 입니다.`)
   let chat = channelObj[msg.channelId].chat
-  if(channelObj[msg.channelId].state !== 'idle') return msg.member && chat.push({content:msg.content,user : msg.member.nickname.split(' ')[0]}) 
+  if(channelObj[msg.channelId].state !== 'idle') return msg.member && chat.push({content:msg.content,user : msg.member.nickname.split(' ')[0],sex: msg.member.roles.cache.some(role=>role.name === '남자')}) 
   if(!msg.member.voice.channelId) return  
   if(msg.content.length > 15) return msg.channel.send('채팅너무길어')
   if(msg.content.includes('피치조절') && !isNaN(parseInt(msg.content.split(' ')[1]))){
@@ -86,7 +86,7 @@ client.on('messageCreate',async msg =>{
   if(msg.content.includes('속도조절') && !isNaN(parseInt(msg.content.split(' ')[1]))){
     speakingRate = msg.content.split(' ')[1]
   }
-  chat.push( { content:msg.content, user: msg.member.nickname.split(' ')[0]})
+  chat.push( { content:msg.content, user: msg.member.nickname.split(' ')[0],sex: msg.member.roles.cache.some(role=>role.name === '남자')})
   channelObj[msg.channelId].state = 'playing'
   async function repeat(){
     // const url = getAudioUrl(chat[0]?.content, {
@@ -102,12 +102,10 @@ client.on('messageCreate',async msg =>{
     })
     const player = createAudioPlayer();
     let resource
-    if(msg.member.roles.cache.some(role=>role.name === '남자')){
+    if(chat[0].sex){
       resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'MALE','ko-KR-Wavenet-D',pitch,speakingRate))
-    }else if(msg.member.roles.cache.some(role=>role.name === '여자')){
-      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-B',pitch,speakingRate))
     }else{
-      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Standard-C',pitch,speakingRate))
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-B',pitch,speakingRate))
     }
     connection.subscribe(player);      
     player.play(resource)

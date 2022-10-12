@@ -103,10 +103,15 @@ client.on('messageCreate',async msg =>{
     const player = createAudioPlayer();
     let resource
     if(chat[0].sex){
-      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-D',pitch,speakingRate))
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-D',pitch,speakingRate),{
+        inlineVolume: true
+      })
     }else{
-      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-B',pitch,speakingRate))
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-B',pitch,speakingRate),{
+        inlineVolume: true
+      })
     }
+    resource.volume.setVolume(0.5)
     connection.subscribe(player);      
     player.play(resource)
 

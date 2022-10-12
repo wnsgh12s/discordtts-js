@@ -47,7 +47,6 @@ client.on('interactionCreate', async interaction => {
 	if (!command) return;
 	try {
 		await command.execute(interaction);
-    await interaction.guild.members.cache.get(client.user.id).setNickname('돈땃쥐미')
 	} catch (error) {
 		console.error(error);
 		await interaction.reply({ content: '에러떳다', ephemeral: true });
@@ -57,7 +56,8 @@ client.on('interactionCreate', async interaction => {
 let channelObj = {
   '841686942772494397':{
     chat : [],
-    state : 'idle'
+    state : 'idle',
+    user:[]
   },
   '857626669225738264':{
     chat : [],
@@ -79,7 +79,7 @@ client.on('messageCreate',async msg =>{
   let chat = channelObj[msg.channelId].chat
   if(channelObj[msg.channelId].state !== 'idle') return msg.member && chat.push({content:msg.content,user : msg.member.nickname.split(' ')[0],sex: msg.member.roles.cache.some(role=>role.name === '남자')}) 
   if(!msg.member.voice.channelId) return  
-  if(msg.content.length > 15) return msg.channel.send('채팅너무길어')
+  if(msg.content.length > 50) return msg.channel.send('채팅너무길어')
   if(msg.content.includes('피치조절') && !isNaN(parseInt(msg.content.split(' ')[1]))){
     pitch = msg.content.split(' ')[1]
   }
@@ -103,7 +103,7 @@ client.on('messageCreate',async msg =>{
     const player = createAudioPlayer();
     let resource
     if(chat[0].sex){
-      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'MALE','ko-KR-Wavenet-D',pitch,speakingRate))
+      resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-D',pitch,speakingRate))
     }else{
       resource = createAudioResource(convertTexttoMp3(chat[0]?.content,'FEMALE','ko-KR-Wavenet-B',pitch,speakingRate))
     }

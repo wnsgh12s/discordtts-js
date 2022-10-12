@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('@discordjs/builders');
-const {joinVoiceChannel,createAudioPlayer,createAudioResource,} = require('@discordjs/voice');
+const {joinVoiceChannel,createAudioPlayer,createAudioResource, AudioPlayerStatus,} = require('@discordjs/voice');
 const fs = require('fs')
 const { ButtonStyle } = require('discord-api-types/v10');
 const { MessageButton, MessageActionRow, MessageSelectMenu } = require('discord.js');
@@ -34,23 +34,19 @@ module.exports = {
       fillter,
       time: 5000
     })
-
-    collector.on('collect',async(i)=>{
-      await i.reply({content:'재생',components:[]})
-      const player = createAudioPlayer();
-      const connection = joinVoiceChannel({
+    const player = createAudioPlayer();
+    const connection = joinVoiceChannel({
         channelId: interaction.member.voice.channelId,
         guildId: interaction.guildId,
         adapterCreator: interaction.guild.voiceAdapterCreator
       });
-      const resorce = createAudioResource(`./sounds/${i.values[0]}`,{
-        inlineVolume:true
-      })
-      resorce.volume.setVolume(0.1)
+    let resorce
+    collector.on('collect',async(i)=>{
+      await i.reply({content:'재생',components:[]})
       connection.subscribe(player);
+      resorce = createAudioResource(`./sounds/${i.values[0]}`)
       player.play(resorce)
     })
-
     collector.on('end',async(i)=>{
       interaction.editReply({content:'시간만료',components:[]})
     })

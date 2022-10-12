@@ -111,7 +111,7 @@ client.on('messageCreate',async msg =>{
         inlineVolume: true
       })
     }
-    resource.volume.setVolume(0.5)
+    resource.volume.setVolume(0.7)
     connection.subscribe(player);      
     player.play(resource)
 

@@ -43,6 +43,7 @@ module.exports = {
         button1.setStyle("PRIMARY");
 
     const btnRow = new MessageActionRow().addComponents([button1]);
+    
     let expulsionMessage = new MessageEmbed().setDescription("패배자를 추방시킵니다.")
     let embed = new MessageEmbed().setDescription(`라이어 게임에 참가하십니까?`)
     await interaction.reply({ embeds: [embed], components: [btnRow]}).then(e=>{

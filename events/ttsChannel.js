@@ -2,6 +2,7 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerSta
 require('dotenv').config();
 const textTospeech = require('@google-cloud/text-to-speech')
 const speech = new textTospeech.TextToSpeechClient()
+let chatChannel = require('../commands/addChannel')
 module.exports = {
   name: 'messageCreate',
   once: false,
@@ -18,23 +19,9 @@ module.exports = {
     })
     return response.audioContent
   },
-  channelObj : {
-    '841686942772494397':{
-      chat : [],
-      state : 'idle',
-      user:[]
-    },
-    '857626669225738264':{
-      chat : [],
-      state : 'idle'
-    },
-    '402390441300983810':{
-      chat : [],
-      state : 'idle'
-    }
-  },
-  async execute(msg){
-    let channelObj = this.channelObj
+  async execute(msg){  
+    console.log(msg.content,chatChannel.channelObj)
+    let channelObj = chatChannel.channelObj
     if(channelObj[msg.channelId] === undefined) return   
     if(msg.author.bot) return 
     let botId = msg.guild.members.cache.get(msg.guild.client.user.id).voice.channelId

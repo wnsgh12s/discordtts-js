@@ -39,10 +39,6 @@ client.on('interactionCreate', async interaction => {
 		await interaction.reply({ content: '에러떳다', ephemeral: true });
 	}
 });
-client.on('interactionCreate',(interaction)=>{
-  console.log(interaction)
-})
-
 
 
 client.login(token);

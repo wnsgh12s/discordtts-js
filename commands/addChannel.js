@@ -33,7 +33,7 @@ module.exports = {
     const row = new MessageActionRow().addComponents(
       new MessageSelectMenu()
       .setCustomId('1')
-      .setPlaceholder('카테고리')
+      .setPlaceholder('선택')
       .addOptions(category)
     )
 
@@ -45,7 +45,7 @@ module.exports = {
       fillter,
       time: 5000
     })
-    interaction.reply({content:'채널이 추가중입니다',components:[row]})
+    interaction.reply({content:'채널을 추가중...',components:[row]})
 
     collector.on('collect',async(i)=>{
       switch(i.values[0]){

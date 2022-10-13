@@ -20,7 +20,6 @@ module.exports = {
     return response.audioContent
   },
   async execute(msg){  
-    console.log(msg.content,chatChannel.channelObj)
     let channelObj = chatChannel.channelObj
     if(channelObj[msg.channelId] === undefined) return   
     if(msg.author.bot) return 

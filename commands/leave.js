@@ -1,6 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const {joinVoiceChannel,createAudioPlayer,createAudioResource, AudioPlayerStatus, getVoiceConnection} = require('@discordjs/voice')
-const {getAudioUrl} = require('google-tts-api')
+const {getVoiceConnection} = require('@discordjs/voice')
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('leave')
@@ -10,5 +9,6 @@ module.exports = {
     let connection = getVoiceConnection(interaction.guildId)
     connection && connection.destroy()
     interaction.reply({content:'땃쥐 제거완료'})
+    interaction
 	}
 };  
